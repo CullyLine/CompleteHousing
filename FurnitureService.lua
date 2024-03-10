@@ -1,7 +1,12 @@
 local FurnitureService = {}
 
-local dataService = require(script.Parent.DataService)
+local furnitureObjectModule = require(script.Parent:WaitForChild("FurnitureObject"))
 local furnitureModels = script.Parent:WaitForChild("FurnitureModels")
+
+-- User is trying to place a new piece of this furniture at a certain CFrame.
+FurnitureService.placeFurniture = function(player : Player, furnitureModelName : string, cframe : CFrame)
+
+end
 
 -- FurnitureService.placeFurniture = function(player : Player, furnitureArgs)
 -- 	local furnitureModel = furnitureModels:FindFirstChild(furnitureArgs["FurnitureID"]):Clone()
