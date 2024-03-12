@@ -1,10 +1,26 @@
 local FurnitureService = {}
 
-local furnitureObjectModule = require(script.Parent:WaitForChild("FurnitureObject"))
-local furnitureModels = script.Parent:WaitForChild("FurnitureModels")
+local furnitureObjectModule = require(script:WaitForChild("FurnitureObject"))
 
 -- User is trying to place a new piece of this furniture at a certain CFrame.
-FurnitureService.placeFurniture = function(player : Player, furnitureModelName : string, cframe : CFrame)
+FurnitureService.userPlaceFurniture = function(player : Player, furnitureModelName : string, cframe : CFrame)
+	local extraArgs = {
+		Load = false,
+		cframe = cframe
+	}
+
+	-- Create an object for this furniture, and a model for it in the workspace.
+	-- Generate a new GUID for the object, and other necessary data.
+	local furnitureObject = furnitureObjectModule.new(furnitureModelName, extraArgs)
+
+
+end
+
+-- User is trying to delete the selected piece of furniture.
+FurnitureService.userDeleteFurniture = function(player : Player, furnitureGUID : string)
+	-- Find the furniture object with the given GUID, and delete it from the workspace.
+	-- Also, delete the object from the player's data.
+
 
 end
 
