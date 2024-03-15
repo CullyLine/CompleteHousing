@@ -5,7 +5,6 @@ local furnitureObjectModule = require(script:WaitForChild("FurnitureObject"))
 -- User is trying to place a new piece of this furniture at a certain CFrame.
 FurnitureService.userPlaceFurniture = function(player : Player, furnitureModelName : string, cframe : CFrame)
 	local extraArgs = {
-		Load = false,
 		cframe = cframe
 	}
 
@@ -15,6 +14,10 @@ FurnitureService.userPlaceFurniture = function(player : Player, furnitureModelNa
 
 
 end
+
+game.ReplicatedStorage.DevRemoteEvent.OnServerEvent:Connect(function(player, furnitureModelName, cframe)
+    FurnitureService.userPlaceFurniture(player, furnitureModelName, cframe)
+end)
 
 -- User is trying to delete the selected piece of furniture.
 FurnitureService.userDeleteFurniture = function(player : Player, furnitureGUID : string)
