@@ -1,9 +1,38 @@
 -- FurnitureModels for previewing furniture before placing it.
 local furnitureModels = game.ReplicatedStorage:WaitForChild("FurnitureModels")
 
+local ghost = nil
 
+task.wait(2)
 
+-- Create a ghost model of the furniture the player is trying to place.
+ghost = furnitureModels:FindFirstChild("BrownChair"):Clone()
+ghost.Parent = workspace
+ghost.PrimaryPart.SurfaceGui.ImageLabel.ImageTransparency = 0
+for _, p in pairs(ghost:GetDescendants()) do
+    if (p.Name == "Primary") then
+        continue
+    end
 
+    if (p:IsA("MeshPart")) then
+        p.Transparency = 0.5
+    end
+end
+
+-- Move the "ghost" or preview furniture to the position of the mouse each frame.
+game:GetService("RunService").RenderStepped:Connect(function(dt)
+    local mouse = game.Players.LocalPlayer:GetMouse()
+
+    -- Ignore the ghost model when raycasting.
+    mouse.TargetFilter = ghost
+    if (not mouse.Target) then
+        return
+    end
+    
+    -- Lock the ghost model to the grid.
+    local gridPos = Vector3.new(math.round(mouse.Hit.X), mouse.Hit.Y, math.round(mouse.Hit.Z))
+    ghost:SetPrimaryPartCFrame(CFrame.new(gridPos))
+end)
 
 
 
