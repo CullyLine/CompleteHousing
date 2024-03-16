@@ -1,6 +1,37 @@
 local FurnitureService = {}
 
+-- Move furniture models to ReplicatedStorage so the player can see the furniture while trying to place one.
+local furnitureModels = script:WaitForChild("FurnitureModels")
+furnitureModels.Parent = game.ReplicatedStorage
+
+-- Set up all the furniture models for use with CompleteHousing.
+for _, furnitureModel in pairs(furnitureModels:GetChildren()) do
+	-- Put the furniture inside a new Model, copy the part "Primary" which works as both a selection box and a primary part.
+	-- Set the primary part to the part "Primary" and set the CFrame of the primary part to the bounding box position, with the y value set to the bottom of the model.
+	-- This is so that the furniture is placed on the ground.
+	local newModel = Instance.new("Model") 
+	newModel.Name = furnitureModel.Name
+	furnitureModel.Parent = newModel
+	newModel.Parent = furnitureModels
+	local primaryPart = script:WaitForChild("FurnitureObject").Primary:Clone()
+	primaryPart.Parent = newModel
+	newModel.PrimaryPart = primaryPart
+	local orientation, size = furnitureModel:GetBoundingBox()
+	primaryPart.CFrame = CFrame.new(orientation.Position.X, orientation.Position.Y - size.Y / 2, orientation.Position.Z)
+    
+    -- Set the selection box to be transparent.
+    primaryPart.SurfaceGui.ImageLabel.ImageTransparency = 1
+end
+
+-- FurnitureObject module script which, when an instance of it is created, contains information about a placed piece of furniture.
 local furnitureObjectModule = require(script:WaitForChild("FurnitureObject"))
+
+-- Move FurnitureLocal local script to StarterPlayerScripts, and add it to any players already in the game.
+-- This handles all the local functionality for placing and deleting furniture.
+for _, player in pairs(game.Players:GetPlayers()) do
+	script.FurnitureLocal:Clone().Parent = player:WaitForChild("PlayerScripts")
+end
+script.FurnitureLocal.Parent = game.StarterPlayer.StarterPlayerScripts
 
 -- User is trying to place a new piece of this furniture at a certain CFrame.
 FurnitureService.userPlaceFurniture = function(player : Player, furnitureModelName : string, cframe : CFrame)
@@ -16,7 +47,7 @@ FurnitureService.userPlaceFurniture = function(player : Player, furnitureModelNa
 end
 
 game.ReplicatedStorage.DevRemoteEvent.OnServerEvent:Connect(function(player, furnitureModelName, cframe)
-    FurnitureService.userPlaceFurniture(player, furnitureModelName, cframe)
+	FurnitureService.userPlaceFurniture(player, furnitureModelName, cframe)
 end)
 
 -- User is trying to delete the selected piece of furniture.
