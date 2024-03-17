@@ -46,7 +46,21 @@ FurnitureService.userPlaceFurniture = function(player : Player, furnitureModelNa
 
 end
 
-game.ReplicatedStorage.DevRemoteEvent.OnServerEvent:Connect(function(player, furnitureModelName, cframe)
+-- game.ReplicatedStorage.DevRemoteEvent.OnServerEvent:Connect(function(player, furnitureModelName, cframe)
+-- 	FurnitureService.userPlaceFurniture(player, furnitureModelName, cframe)
+-- end)
+
+game.ReplicatedStorage.DevRemoteEvent.OnServerEvent:Connect(function(player, furnitureArgs)
+	local furnitureModelName = furnitureArgs["FurnitureModelName"]
+
+	local positionOffsetX = furnitureArgs["PositionOffsetX"]
+	local positionOffsetY = furnitureArgs["PositionOffsetY"]
+	local positionOffsetZ = furnitureArgs["PositionOffsetZ"]
+
+	local origin = workspace.Origin.Position
+
+	local cframe = CFrame.new(Vector3.new(origin.X + positionOffsetX, origin.Y + positionOffsetY, origin.Z + positionOffsetZ))
+
 	FurnitureService.userPlaceFurniture(player, furnitureModelName, cframe)
 end)
 

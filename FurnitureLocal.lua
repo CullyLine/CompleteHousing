@@ -3,6 +3,8 @@ local furnitureModels = game.ReplicatedStorage:WaitForChild("FurnitureModels")
 
 local ghost = nil
 
+local mouse = game.Players.LocalPlayer:GetMouse()
+
 task.wait(2)
 
 -- Create a ghost model of the furniture the player is trying to place.
@@ -31,10 +33,51 @@ game:GetService("RunService").RenderStepped:Connect(function(dt)
     
     -- Lock the ghost model to the grid.
     local gridPos = Vector3.new(math.round(mouse.Hit.X), mouse.Hit.Y, math.round(mouse.Hit.Z))
+
+    -- Move the ghost furniture to the new position.
     ghost:SetPrimaryPartCFrame(CFrame.new(gridPos))
 end)
 
+-- User is trying to place the furniture.
+local function attemptPlaceFurniture()
+    if (not ghost) then
+        return
+    end
 
+    -- Put all the info of the ghost object into a dictionary named "furnitureArgs".
+    -- The position offset is the difference between the ghost's position and the origin of the player plot's origin,
+    -- this is to make sure the furniture is placed in the correct position, no matter where the player's plot is.
+    -- Send all of this info about what piece of furniture the players wants to place, and where,
+    -- to the server, where we can check if the player is allowed to place the furniture in the desired location.
+    -- If the player is allowed to place the furniture, we can then place the furniture in the desired location, but on the server,
+    -- so it replicates / is shown to all players in the game.
+    local furnitureArgs = {}
+    local origin = workspace.Origin.Position
+    furnitureArgs["PositionOffsetX"] = ghost.PrimaryPart.Position.X - origin.X
+    furnitureArgs["PositionOffsetY"] = ghost.PrimaryPart.Position.Y - origin.Y
+    furnitureArgs["PositionOffsetZ"] = ghost.PrimaryPart.Position.Z - origin.Z
+    furnitureArgs["RotationOffsetX"] = 0
+    furnitureArgs["RotationOffsetY"] = 0
+    furnitureArgs["RotationOffsetZ"] = 0
+    furnitureArgs["FurnitureModelName"] = ghost.Name
+
+    game.ReplicatedStorage.PlaceFurnitureRemoteEvent:FireServer(furnitureArgs)
+
+    -- 	local furnitureArgs = {}
+-- 	local origin = workspace.Origin.Position
+-- 	furnitureArgs["PositionOffsetX"] = ghost.PrimaryPart.Position.X - origin.X
+-- 	furnitureArgs["PositionOffsetY"] = ghost.PrimaryPart.Position.Y - origin.Y
+-- 	furnitureArgs["PositionOffsetZ"] = ghost.PrimaryPart.Position.Z - origin.Z
+-- 	furnitureArgs["RotationOffsetX"] = userRotation.X
+-- 	furnitureArgs["RotationOffsetY"] = userRotation.Y
+-- 	furnitureArgs["RotationOffsetZ"] = userRotation.Z
+-- 	furnitureArgs["FurnitureID"] = ghost.Name
+end
+
+-- Player clicked while moving the ghost furniture.
+mouse.Button1Up:Connect(function()
+    attemptPlaceFurniture()
+end)
 
 -- local runService = game:GetService("RunService")
 -- local userInputService = game:GetService("UserInputService")
