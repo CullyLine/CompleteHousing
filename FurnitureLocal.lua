@@ -3,14 +3,23 @@ local userInputService = game:GetService("UserInputService")
 -- FurnitureModels for previewing furniture before placing it.
 local furnitureModels = game.ReplicatedStorage:WaitForChild("FurnitureModels")
 
-local ghost = nil
-
 local mouse = game.Players.LocalPlayer:GetMouse()
 
+-- Furniture placing variables.
 local userAttemptPlaceFurnitureRemoteEvent = game.ReplicatedStorage:WaitForChild("UserAttemptPlaceFurnitureRemoteEvent")
-
+local ghost = nil
 local userRotation = Vector3.new(0, 0, 0)
 local rotationInterval = 15
+
+-- Furniture "Mode" (placing, deleting, etc.)
+local furnitureMode = "placing"
+
+-- Furniture highlight object, used to highlight the currently selected piece of furniture, specifically for deleting and moving it.
+local currentlySelectedFurniture = nil
+local currentlySelectedFurnitureHighlight = script:WaitForChild("CurrentlySelectedFurnitureHighlight")
+
+-- Function variables, defined here and then assigned lower in the code so we may use the functions anywhere in the code.
+local changeMode = nil
 
 task.wait(2)
 
@@ -28,21 +37,54 @@ for _, p in pairs(ghost:GetDescendants()) do
     end
 end
 
+-- Find the upper most model of a part.
+-- Helpful for raycasting, an example in this code is for when the player is trying to delete a piece of furniture.
+-- If you raycast, and it hits a part multiple models deep inside the furniture, it will grab the top most model.
+-- I had to add this because of a seat part which was many models inside a chair, hovering over it would not highlight the furniture.
+-- https://devforum.roblox.com/t/getting-the-last-parent/1298499
+local function GetUpperMostModel(Part,TargetedParent)
+    TargetedParent = TargetedParent or workspace
+    local Parent = Part.Parent
+    if Parent == game then error("Failed to get model from "..(Part.Name)) end
+    return Parent ~= TargetedParent and GetUpperMostModel(Parent,TargetedParent) or Part
+end
+
 -- Move the "ghost" or preview furniture to the position of the mouse each frame.
 game:GetService("RunService").RenderStepped:Connect(function(dt)
-    local mouse = game.Players.LocalPlayer:GetMouse()
+    -- Reset these variables each frame.
+    currentlySelectedFurniture = nil
+    currentlySelectedFurnitureHighlight.Adornee = nil
 
-    -- Ignore the ghost model when raycasting.
-    mouse.TargetFilter = ghost
-    if (not mouse.Target) then
-        return
+    -- If player is currently placing furniture, run all this code each frame.
+    if (furnitureMode == "placing") then
+         -- Ignore the ghost model when raycasting.
+        mouse.TargetFilter = ghost
+        if (not mouse.Target) then
+            return
+        end
+        
+        -- Lock the ghost model to the grid.
+        local gridPos = Vector3.new(math.round(mouse.Hit.X), mouse.Hit.Y, math.round(mouse.Hit.Z))
+
+        -- Move the ghost furniture to the new position.
+        ghost:SetPrimaryPartCFrame(CFrame.new(gridPos) * CFrame.Angles(0, math.rad(userRotation.Y), 0))
+    elseif (furnitureMode == "deleting") then
+        -- If the player is currently deleting furniture, run all this code each frame.
+        -- Raycast to see if the player is looking at a piece of furniture.
+        local unitRay = workspace.CurrentCamera:ScreenPointToRay(mouse.X, mouse.Y)
+        local raycast : RaycastResult = workspace:Raycast(unitRay.Origin, unitRay.Direction * 100)
+        if (raycast and raycast.Instance) then
+            -- Grab the upper most model of this part which was hit, more info in the function "GetUpperMostModel".
+            -- "FindFirstAncestor" sometimes does not work, so we have to use this function to get the top most model, leaving as an example.
+            --local upperParent = raycast.Instance:FindFirstAncestorWhichIsA("Model")
+            local upperMostModel = GetUpperMostModel(raycast.Instance)
+            if (upperMostModel) then
+                currentlySelectedFurniture = upperMostModel
+                currentlySelectedFurnitureHighlight.Adornee = upperMostModel
+            end
+        end
     end
-    
-    -- Lock the ghost model to the grid.
-    local gridPos = Vector3.new(math.round(mouse.Hit.X), mouse.Hit.Y, math.round(mouse.Hit.Z))
-
-    -- Move the ghost furniture to the new position.
-    ghost:SetPrimaryPartCFrame(CFrame.new(gridPos) * CFrame.Angles(0, math.rad(userRotation.Y), 0))
+   
 end)
 
 -- User is trying to place the furniture.
@@ -71,9 +113,22 @@ local function attemptPlaceFurniture()
     userAttemptPlaceFurnitureRemoteEvent:FireServer(furnitureArgs)
 end
 
--- Player clicked while moving the ghost furniture.
+-- User is trying to delete the currently selected furniture.
+local function attemptDeleteFurniture()
+    if (currentlySelectedFurniture) then
+        currentlySelectedFurniture:Destroy()
+    end
+end
+
+-- Player left clicked with a PC mouse.
 mouse.Button1Up:Connect(function()
-    attemptPlaceFurniture()
+    if (furnitureMode == "placing") then
+        -- Place furniture on PC.
+        attemptPlaceFurniture()
+    elseif (furnitureMode == "deleting") then
+        -- Delete furniture on PC.
+        attemptDeleteFurniture()
+    end
 end)
 
 -- Player is trying to rotate the furniture.
@@ -94,20 +149,25 @@ local function rotateFurniture(direction)
     userRotation += Vector3.new(0, rotation, 0)
 end
 
--- Player pressed E or Q to rotate the furniture.
+-- Handle all the input (keybinds).
 userInputService.InputEnded:Connect(function(input: InputObject, processed)
     if (processed) then
         return
     end
 
     if (input.KeyCode == Enum.KeyCode.E) then
+        -- Rotate right on keyboard.
         rotateFurniture(true)
     elseif (input.KeyCode == Enum.KeyCode.Q) then
+        -- Rotate left on keyboard.
         rotateFurniture(false)
+    elseif (input.KeyCode == Enum.KeyCode.F) then
+        -- Switch furniture mode on keyboard.
+        changeMode("deleting")
     end
 end)
 
--- Player used scroll wheel to rotate the furniture.
+-- Player used scroll wheel on a PC mouse to rotate the furniture.
 userInputService.InputChanged:Connect(function(input: InputObject)
     if (input.UserInputType == Enum.UserInputType.MouseWheel) then
         if (input.Position.Z > 0) then
@@ -117,3 +177,18 @@ userInputService.InputChanged:Connect(function(input: InputObject)
         end
     end
 end)
+
+-- Change to a new furniture edit mode ("placing", "deleting", "moving")
+changeMode = function(newMode)
+    if (newMode == "placing") then
+
+    elseif (newMode == "deleting") then
+        if (ghost) then
+            ghost:Destroy()
+        end
+
+
+    end
+
+    furnitureMode = newMode
+end
