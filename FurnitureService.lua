@@ -4,6 +4,9 @@ local FurnitureService = {}
 local furnitureModels = script:WaitForChild("FurnitureModels")
 furnitureModels.Parent = game.ReplicatedStorage
 
+local userAttemptPlaceFurnitureRemoteEvent = Instance.new("RemoteEvent", game.ReplicatedStorage)
+userAttemptPlaceFurnitureRemoteEvent.Name = "UserAttemptPlaceFurnitureRemoteEvent"
+
 -- Set up all the furniture models for use with CompleteHousing.
 for _, furnitureModel in pairs(furnitureModels:GetChildren()) do
 	-- Put the furniture inside a new Model, copy the part "Primary" which works as both a selection box and a primary part.
@@ -50,16 +53,21 @@ end
 -- 	FurnitureService.userPlaceFurniture(player, furnitureModelName, cframe)
 -- end)
 
-game.ReplicatedStorage.DevRemoteEvent.OnServerEvent:Connect(function(player, furnitureArgs)
+userAttemptPlaceFurnitureRemoteEvent.OnServerEvent:Connect(function(player, furnitureArgs)
 	local furnitureModelName = furnitureArgs["FurnitureModelName"]
 
 	local positionOffsetX = furnitureArgs["PositionOffsetX"]
 	local positionOffsetY = furnitureArgs["PositionOffsetY"]
 	local positionOffsetZ = furnitureArgs["PositionOffsetZ"]
 
+	local rotationOffsetY = furnitureArgs["RotationOffsetY"]
+
 	local origin = workspace.Origin.Position
 
 	local cframe = CFrame.new(Vector3.new(origin.X + positionOffsetX, origin.Y + positionOffsetY, origin.Z + positionOffsetZ))
+
+	-- Apply rotation
+	cframe = cframe * CFrame.Angles(0, math.rad(rotationOffsetY), 0)
 
 	FurnitureService.userPlaceFurniture(player, furnitureModelName, cframe)
 end)

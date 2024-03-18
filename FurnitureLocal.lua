@@ -1,9 +1,16 @@
+local userInputService = game:GetService("UserInputService")
+
 -- FurnitureModels for previewing furniture before placing it.
 local furnitureModels = game.ReplicatedStorage:WaitForChild("FurnitureModels")
 
 local ghost = nil
 
 local mouse = game.Players.LocalPlayer:GetMouse()
+
+local userAttemptPlaceFurnitureRemoteEvent = game.ReplicatedStorage:WaitForChild("UserAttemptPlaceFurnitureRemoteEvent")
+
+local userRotation = Vector3.new(0, 0, 0)
+local rotationInterval = 15
 
 task.wait(2)
 
@@ -35,7 +42,7 @@ game:GetService("RunService").RenderStepped:Connect(function(dt)
     local gridPos = Vector3.new(math.round(mouse.Hit.X), mouse.Hit.Y, math.round(mouse.Hit.Z))
 
     -- Move the ghost furniture to the new position.
-    ghost:SetPrimaryPartCFrame(CFrame.new(gridPos))
+    ghost:SetPrimaryPartCFrame(CFrame.new(gridPos) * CFrame.Angles(0, math.rad(userRotation.Y), 0))
 end)
 
 -- User is trying to place the furniture.
@@ -57,26 +64,47 @@ local function attemptPlaceFurniture()
     furnitureArgs["PositionOffsetY"] = ghost.PrimaryPart.Position.Y - origin.Y
     furnitureArgs["PositionOffsetZ"] = ghost.PrimaryPart.Position.Z - origin.Z
     furnitureArgs["RotationOffsetX"] = 0
-    furnitureArgs["RotationOffsetY"] = 0
+    furnitureArgs["RotationOffsetY"] = userRotation.Y
     furnitureArgs["RotationOffsetZ"] = 0
     furnitureArgs["FurnitureModelName"] = ghost.Name
 
-    game.ReplicatedStorage.PlaceFurnitureRemoteEvent:FireServer(furnitureArgs)
-
-    -- 	local furnitureArgs = {}
--- 	local origin = workspace.Origin.Position
--- 	furnitureArgs["PositionOffsetX"] = ghost.PrimaryPart.Position.X - origin.X
--- 	furnitureArgs["PositionOffsetY"] = ghost.PrimaryPart.Position.Y - origin.Y
--- 	furnitureArgs["PositionOffsetZ"] = ghost.PrimaryPart.Position.Z - origin.Z
--- 	furnitureArgs["RotationOffsetX"] = userRotation.X
--- 	furnitureArgs["RotationOffsetY"] = userRotation.Y
--- 	furnitureArgs["RotationOffsetZ"] = userRotation.Z
--- 	furnitureArgs["FurnitureID"] = ghost.Name
+    userAttemptPlaceFurnitureRemoteEvent:FireServer(furnitureArgs)
 end
 
 -- Player clicked while moving the ghost furniture.
 mouse.Button1Up:Connect(function()
     attemptPlaceFurniture()
+end)
+
+-- Player is trying to rotate the furniture.
+-- Pass true to rotate the furniture to the right, and false to rotate the furniture to the left.
+local function rotateFurniture(direction)
+    -- Calculate how far to rotate the furniture based off the direction.
+    local rotation = 0
+    rotation = rotationInterval
+    if (direction == true) then
+        rotation = -rotation
+    elseif (direction == false) then
+
+    else
+        error("Direction param must be true to rotate right, and false to rotate left.")
+        return
+    end
+
+    userRotation += Vector3.new(0, rotation, 0)
+end
+
+-- Player pressed E or Q to rotate the furniture.
+userInputService.InputEnded:Connect(function(input: InputObject, processed)
+    if (processed) then
+        return
+    end
+
+    if (input.KeyCode == Enum.KeyCode.E) then
+        rotateFurniture(true)
+    elseif (input.KeyCode == Enum.KeyCode.Q) then
+        rotateFurniture(false)
+    end
 end)
 
 -- local runService = game:GetService("RunService")
