@@ -107,6 +107,17 @@ userInputService.InputEnded:Connect(function(input: InputObject, processed)
     end
 end)
 
+-- Player used scroll wheel to rotate the furniture.
+userInputService.InputChanged:Connect(function(input: InputObject)
+    if (input.UserInputType == Enum.UserInputType.MouseWheel) then
+        if (input.Position.Z > 0) then
+            rotateFurniture(true)
+        else
+            rotateFurniture(false)
+        end
+    end
+end)
+
 -- local runService = game:GetService("RunService")
 -- local userInputService = game:GetService("UserInputService")
 
