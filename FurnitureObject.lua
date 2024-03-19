@@ -2,6 +2,7 @@ local FurnitureObject = {}
 FurnitureObject.__index = FurnitureObject
 
 local furnitureModels = game.ReplicatedStorage:WaitForChild("FurnitureModels")
+local furnitureFolder = workspace:WaitForChild("Furniture")
 
 function FurnitureObject.new(FurnitureModelName, extraArgs)
 	local self = setmetatable({}, FurnitureObject)
@@ -20,7 +21,17 @@ function FurnitureObject.new(FurnitureModelName, extraArgs)
 
 	-- Create a copy of the furniture model from ReplicatedStorage.
 	self.ModelInstance = furnitureModels:FindFirstChild(FurnitureModelName):Clone()
-    self.ModelInstance.Parent = workspace
+
+	-- Find the user's folder in the workspace's furniture folder, or create it if it doesn't exist.
+	local userFurnitureFolder = furnitureFolder:FindFirstChild(extraArgs.player.Name)
+	if (not userFurnitureFolder) then
+		userFurnitureFolder = Instance.new("Folder")
+		userFurnitureFolder.Name = extraArgs.player.Name 
+		userFurnitureFolder.Parent = furnitureFolder
+	end
+	
+	-- Parent the new placed furniture to the user's folder in the furniture folder.
+    self.ModelInstance.Parent = userFurnitureFolder
 
 	-- Set the primary part's CFrame to the one provided in the extraArgs.
 	self.ModelInstance:SetPrimaryPartCFrame(extraArgs.cframe)

@@ -6,6 +6,12 @@ furnitureModels.Parent = game.ReplicatedStorage
 
 local userAttemptPlaceFurnitureRemoteEvent = Instance.new("RemoteEvent", game.ReplicatedStorage)
 userAttemptPlaceFurnitureRemoteEvent.Name = "UserAttemptPlaceFurnitureRemoteEvent"
+local userAttemptDeleteFurnitureRemoteEvent = Instance.new("RemoteEvent", game.ReplicatedStorage)
+userAttemptDeleteFurnitureRemoteEvent.Name = "UserAttemptDeleteFurnitureRemoteEvent"
+
+-- Create a folder in the workspace to store all the placed furniture.
+local furnitureFolder = Instance.new("Folder", workspace)
+furnitureFolder.Name = "Furniture"
 
 -- Set up all the furniture models for use with CompleteHousing.
 for _, furnitureModel in pairs(furnitureModels:GetChildren()) do
@@ -39,7 +45,8 @@ script.FurnitureLocal.Parent = game.StarterPlayer.StarterPlayerScripts
 -- User is trying to place a new piece of this furniture at a certain CFrame.
 FurnitureService.userPlaceFurniture = function(player : Player, furnitureModelName : string, cframe : CFrame)
 	local extraArgs = {
-		cframe = cframe
+		cframe = cframe,
+		player = player,
 	}
 
 	-- Create an object for this furniture, and a model for it in the workspace.
@@ -75,5 +82,9 @@ FurnitureService.userDeleteFurniture = function(player : Player, furnitureGUID :
 
 
 end 
+
+userAttemptDeleteFurnitureRemoteEvent.OnServerEvent:Connect(function(player, furnitureGUID)
+	FurnitureService.userDeleteFurniture(player, furnitureGUID)
+end)
 
 return FurnitureService
