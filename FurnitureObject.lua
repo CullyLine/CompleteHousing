@@ -46,7 +46,8 @@ function FurnitureObject.new(FurnitureModelName, extraArgs)
 		self.GUID = game:GetService("HttpService"):GenerateGUID(false)    
 	end
 
-
+	-- Set the guid attribute, so we can uniquely idenity this piece of furniture.
+	self.ModelInstance:SetAttribute("GUID", self.GUID)
 
 	return self
 end
