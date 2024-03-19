@@ -7,6 +7,7 @@ local mouse = game.Players.LocalPlayer:GetMouse()
 
 -- Furniture placing variables.
 local userAttemptPlaceFurnitureRemoteEvent = game.ReplicatedStorage:WaitForChild("UserAttemptPlaceFurnitureRemoteEvent")
+local userAttemptDeleteFurnitureRemoteEvent = game.ReplicatedStorage:WaitForChild("UserAttemptDeleteFurnitureRemoteEvent")
 local ghost = nil
 local userRotation = Vector3.new(0, 0, 0)
 local rotationInterval = 15
@@ -45,6 +46,9 @@ end
 local function GetUpperMostModel(Part,TargetedParent)
     TargetedParent = TargetedParent or workspace
     local Parent = Part.Parent
+    if (Parent:IsA("Folder")) then
+        return Part
+    end
     if Parent == game then error("Failed to get model from "..(Part.Name)) end
     return Parent ~= TargetedParent and GetUpperMostModel(Parent,TargetedParent) or Part
 end
@@ -79,6 +83,11 @@ game:GetService("RunService").RenderStepped:Connect(function(dt)
             --local upperParent = raycast.Instance:FindFirstAncestorWhichIsA("Model")
             local upperMostModel = GetUpperMostModel(raycast.Instance)
             if (upperMostModel) then
+                -- Check to see if it has a GUID
+                if (not upperMostModel:GetAttribute("GUID")) then
+                    return
+                end
+
                 currentlySelectedFurniture = upperMostModel
                 currentlySelectedFurnitureHighlight.Adornee = upperMostModel
             end
@@ -116,7 +125,7 @@ end
 -- User is trying to delete the currently selected furniture.
 local function attemptDeleteFurniture()
     if (currentlySelectedFurniture) then
-        currentlySelectedFurniture:Destroy()
+        userAttemptDeleteFurnitureRemoteEvent:FireServer(currentlySelectedFurniture:GetAttribute("GUID"))
     end
 end
 

@@ -80,7 +80,21 @@ FurnitureService.userDeleteFurniture = function(player : Player, furnitureGUID :
 	-- Find the furniture object with the given GUID, and delete it from the workspace.
 	-- Also, delete the object from the player's data.
 
+	local userFurnitureFolder = furnitureFolder:FindFirstChild(player.Name)
+	local furnitureObject = nil
 
+	for _, furnitureModel in pairs(userFurnitureFolder:GetChildren()) do
+		if (furnitureModel:GetAttribute("GUID") == furnitureGUID) then
+			furnitureObject = furnitureModel
+		end
+	end
+
+	if (not furnitureObject) then
+		warn("Furniture with GUID " .. furnitureGUID .. " not found in player " .. player.Name .. "'s furniture folder.")
+		return
+	end
+
+	furnitureObject:Destroy()
 end 
 
 userAttemptDeleteFurnitureRemoteEvent.OnServerEvent:Connect(function(player, furnitureGUID)
