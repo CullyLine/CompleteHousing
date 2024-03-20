@@ -8,7 +8,7 @@ local profileService = require(script:WaitForChild("ProfileService"))
 local templateData = {["Furniture"] = {}}
 
 local profileStore = profileService.GetProfileStore(
-	"PayerFurniture" .. "0",
+	"PayerFurniture" .. "1",
 	templateData
 )
 

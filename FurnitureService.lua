@@ -58,7 +58,23 @@ FurnitureService.userPlaceFurniture = function(player : Player, furnitureModelNa
 	-- Generate a new GUID for the object, and other necessary data.
 	local furnitureObject = furnitureObjectModule.new(furnitureModelName, extraArgs)
 
+	-- Save the furniture object to the player's data.
+	local profile = furnitureDefaultDataService.GetProfile(player)
+	local anglesX, anglesY, anglesZ = furnitureObject.ModelInstance.PrimaryPart.CFrame:ToEulerAnglesXYZ()
 
+	-- Convert the angles to degrees. (0 - 360 degrees) It's easier for me to understand.
+	anglesX = math.deg(anglesX)
+	anglesY = math.deg(anglesY)
+	anglesZ = math.deg(anglesZ)
+	profile["Data"]["Furniture"][furnitureObject.GUID] = {
+		FurnitureModelName = furnitureObject.FurnitureModelName,
+		PositionOffsetX = furnitureObject.ModelInstance.PrimaryPart.Position.X - workspace.Origin.Position.X,
+		PositionOffsetY = furnitureObject.ModelInstance.PrimaryPart.Position.Y - workspace.Origin.Position.Y,
+		PositionOffsetZ = furnitureObject.ModelInstance.PrimaryPart.Position.Z - workspace.Origin.Position.Z,
+		RotationOffsetY = anglesY,
+	}
+
+	print(profile.Data.Furniture)
 end
 
 userAttemptPlaceFurnitureRemoteEvent.OnServerEvent:Connect(function(player, furnitureArgs)
