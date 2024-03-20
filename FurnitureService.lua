@@ -83,6 +83,7 @@ FurnitureService.userDeleteFurniture = function(player : Player, furnitureGUID :
 	local userFurnitureFolder = furnitureFolder:FindFirstChild(player.Name)
 	local furnitureObject = nil
 
+	--- XXX todo: this is a bad way to do this, we should use a dictionary instead of a loop
 	for _, furnitureModel in pairs(userFurnitureFolder:GetChildren()) do
 		if (furnitureModel:GetAttribute("GUID") == furnitureGUID) then
 			furnitureObject = furnitureModel
