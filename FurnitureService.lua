@@ -1,5 +1,8 @@
 local FurnitureService = {}
 
+-- Default data service for saving / loading data using profile service.
+local furnitureDefaultDataService = require(script:WaitForChild("FurnitureDefaultDataService"))
+
 -- Move furniture models to ReplicatedStorage so the player can see the furniture while trying to place one.
 local furnitureModels = script:WaitForChild("FurnitureModels")
 furnitureModels.Parent = game.ReplicatedStorage
@@ -42,6 +45,8 @@ for _, player in pairs(game.Players:GetPlayers()) do
 end
 script.FurnitureLocal.Parent = game.StarterPlayer.StarterPlayerScripts
 
+
+---- STRUCTURE ----------------------------------------------------------------
 -- User is trying to place a new piece of this furniture at a certain CFrame.
 FurnitureService.userPlaceFurniture = function(player : Player, furnitureModelName : string, cframe : CFrame)
 	local extraArgs = {
