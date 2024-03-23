@@ -48,21 +48,36 @@ script.FurnitureLocal.Parent = game.StarterPlayer.StarterPlayerScripts
 
 ---- STRUCTURE ----------------------------------------------------------------
 -- User is trying to place a new piece of this furniture at a certain CFrame.
-FurnitureService.userPlaceFurniture = function(player : Player, furnitureModelName : string, cframe : CFrame)
+userAttemptPlaceFurnitureRemoteEvent.OnServerEvent:Connect(function(player, furnitureArgs)
+	-- Gather info about the furniture the player is trying to place. --
+	local furnitureModelName = furnitureArgs["FurnitureModelName"]
+
+	local positionOffsetX = furnitureArgs["PositionOffsetX"]
+	local positionOffsetY = furnitureArgs["PositionOffsetY"]
+	local positionOffsetZ = furnitureArgs["PositionOffsetZ"]
+	local rotationOffsetY = furnitureArgs["RotationOffsetY"]
+
+	local origin = workspace.Origin.Position
+
+	local cframe = CFrame.new(Vector3.new(origin.X + positionOffsetX, origin.Y + positionOffsetY, origin.Z + positionOffsetZ))
+
+	-- Apply rotation
+	cframe = cframe * CFrame.Angles(0, math.rad(rotationOffsetY), 0)
+
 	local extraArgs = {
 		cframe = cframe,
 		player = player,
 	}
 
-	-- Create an object for this furniture, and a model for it in the workspace.
+	-- Create an object for this furniture, and a model for it in the workspace. --
 	-- Generate a new GUID for the object, and other necessary data.
 	local furnitureObject = furnitureObjectModule.new(furnitureModelName, extraArgs)
 
-	-- Save the furniture object to the player's data.
+	-- Save the furniture object to the player's data. --
 	local profile = furnitureDefaultDataService.GetProfile(player)
+	
+	-- Convert the angles to degrees before saving it. (0 - 360 degrees) It's easier for me to understand.
 	local anglesX, anglesY, anglesZ = furnitureObject.ModelInstance.PrimaryPart.CFrame:ToEulerAnglesXYZ()
-
-	-- Convert the angles to degrees. (0 - 360 degrees) It's easier for me to understand.
 	anglesX = math.deg(anglesX)
 	anglesY = math.deg(anglesY)
 	anglesZ = math.deg(anglesZ)
@@ -73,31 +88,42 @@ FurnitureService.userPlaceFurniture = function(player : Player, furnitureModelNa
 		PositionOffsetZ = furnitureObject.ModelInstance.PrimaryPart.Position.Z - workspace.Origin.Position.Z,
 		RotationOffsetY = anglesY,
 	}
+end)
 
-	print(profile.Data.Furniture)
-end
+-- Load player's saved furniture.
+game.ReplicatedStorage.DevRemoteEvent.OnServerEvent:Connect(function(player)
+	-- Gather the player's saved furniture data.
+	local profile = furnitureDefaultDataService.GetProfile(player)
+	local furnitureData = profile["Data"]["Furniture"]
 
-userAttemptPlaceFurnitureRemoteEvent.OnServerEvent:Connect(function(player, furnitureArgs)
-	local furnitureModelName = furnitureArgs["FurnitureModelName"]
+	-- For each piece of furniture in the player's data, create a new object for it.
+	-- This will place the furniture in the correct position in the workspace.
+	for guid, furniture in pairs(furnitureData) do
+		local cframe = CFrame.new(
+			Vector3.new(
+				workspace.Origin.Position.X + furniture.PositionOffsetX,
+				workspace.Origin.Position.Y + furniture.PositionOffsetY,
+				workspace.Origin.Position.Z + furniture.PositionOffsetZ
+			)
+		)
 
-	local positionOffsetX = furnitureArgs["PositionOffsetX"]
-	local positionOffsetY = furnitureArgs["PositionOffsetY"]
-	local positionOffsetZ = furnitureArgs["PositionOffsetZ"]
+		-- Apply rotation
+		cframe = cframe * CFrame.Angles(0, math.rad(furniture.RotationOffsetY), 0)
 
-	local rotationOffsetY = furnitureArgs["RotationOffsetY"]
+		local extraArgs = {
+			cframe = cframe,
+			player = player,
+			Load = true,
+			GUID = guid,
+		}
 
-	local origin = workspace.Origin.Position
+		local furnitureObject = furnitureObjectModule.new(furniture.FurnitureModelName, extraArgs)
+	end
 
-	local cframe = CFrame.new(Vector3.new(origin.X + positionOffsetX, origin.Y + positionOffsetY, origin.Z + positionOffsetZ))
-
-	-- Apply rotation
-	cframe = cframe * CFrame.Angles(0, math.rad(rotationOffsetY), 0)
-
-	FurnitureService.userPlaceFurniture(player, furnitureModelName, cframe)
 end)
 
 -- User is trying to delete the selected piece of furniture.
-FurnitureService.userDeleteFurniture = function(player : Player, furnitureGUID : string)
+userAttemptDeleteFurnitureRemoteEvent.OnServerEvent:Connect(function(player, furnitureGUID)
 	-- Find the furniture object with the given GUID, and delete it from the workspace.
 	-- Also, delete the object from the player's data.
 
@@ -117,10 +143,6 @@ FurnitureService.userDeleteFurniture = function(player : Player, furnitureGUID :
 	end
 
 	furnitureObject:Destroy()
-end 
-
-userAttemptDeleteFurnitureRemoteEvent.OnServerEvent:Connect(function(player, furnitureGUID)
-	FurnitureService.userDeleteFurniture(player, furnitureGUID)
 end)
 
 return FurnitureService
