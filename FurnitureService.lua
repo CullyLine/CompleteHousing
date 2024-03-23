@@ -81,7 +81,7 @@ userAttemptPlaceFurnitureRemoteEvent.OnServerEvent:Connect(function(player, furn
 	anglesX = math.deg(anglesX)
 	anglesY = math.deg(anglesY)
 	anglesZ = math.deg(anglesZ)
-	profile["Data"]["Furniture"][furnitureObject.GUID] = {
+	profile["Furniture"][furnitureObject.GUID] = {
 		FurnitureModelName = furnitureObject.FurnitureModelName,
 		PositionOffsetX = furnitureObject.ModelInstance.PrimaryPart.Position.X - workspace.Origin.Position.X,
 		PositionOffsetY = furnitureObject.ModelInstance.PrimaryPart.Position.Y - workspace.Origin.Position.Y,
@@ -94,7 +94,7 @@ end)
 game.ReplicatedStorage.DevRemoteEvent.OnServerEvent:Connect(function(player)
 	-- Gather the player's saved furniture data.
 	local profile = furnitureDefaultDataService.GetProfile(player)
-	local furnitureData = profile["Data"]["Furniture"]
+	local furnitureData = profile["Furniture"]
 
 	-- For each piece of furniture in the player's data, create a new object for it.
 	-- This will place the furniture in the correct position in the workspace.
