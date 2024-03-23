@@ -98,7 +98,7 @@ function FurnitureDefaultDataService.LoadProfile(player)
 end
 
 function FurnitureDefaultDataService.RemoveProfile(player)
-	local profile = FurnitureDefaultDataService.GetProfile(player)
+	local profile = profiles[player]
 	if (profile) then
 		profile:Release()
 		profiles[player] = nil
