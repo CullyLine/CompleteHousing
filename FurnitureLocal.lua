@@ -178,13 +178,14 @@ end)
 
 -- Player used scroll wheel on a PC mouse to rotate the furniture.
 userInputService.InputChanged:Connect(function(input: InputObject)
-    if (input.UserInputType == Enum.UserInputType.MouseWheel) then
-        if (input.Position.Z > 0) then
-            rotateFurniture(true)
-        else
-            rotateFurniture(false)
-        end
-    end
+    -- Commented out, scroll wheel also zooms in / out the camera.
+    -- if (input.UserInputType == Enum.UserInputType.MouseWheel) then
+    --     if (input.Position.Z > 0) then
+    --         rotateFurniture(true)
+    --     else
+    --         rotateFurniture(false)
+    --     end
+    -- end
 end)
 
 -- Change to a new furniture edit mode ("placing", "deleting", "moving")
