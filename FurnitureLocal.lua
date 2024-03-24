@@ -22,20 +22,58 @@ local currentlySelectedFurnitureHighlight = script:WaitForChild("CurrentlySelect
 -- Function variables, defined here and then assigned lower in the code so we may use the functions anywhere in the code.
 local changeMode = nil
 
+-- UI variables
+local screenUI = game.Players.LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("CompleteHousingUI")
+local hotbar = screenUI:WaitForChild("Hotbar")
+local furnitureScrollingFrame = hotbar:WaitForChild("Furniture")
+local templateFurniture = furnitureScrollingFrame:WaitForChild("TemplateFurniture")
+templateFurniture.Parent = nil
+
 task.wait(2)
 
+-- STRUCTURE --------------------------------------------------------------------------------------------------------
+
 -- Create a ghost model of the furniture the player is trying to place.
-ghost = furnitureModels:FindFirstChild("BrownChair"):Clone()
-ghost.Parent = workspace
-ghost.PrimaryPart.SurfaceGui.ImageLabel.ImageTransparency = 0
-for _, p in pairs(ghost:GetDescendants()) do
-    if (p.Name == "Primary") then
-        continue
+local function switchGhostModel(furnitureName)
+    if (ghost) then
+        ghost:Destroy()
+        ghost = nil
     end
 
-    if (p:IsA("MeshPart")) then
-        p.Transparency = 0.5
+    ghost = furnitureModels:FindFirstChild(furnitureName):Clone()
+    ghost.Parent = workspace
+    ghost.PrimaryPart.SurfaceGui.ImageLabel.ImageTransparency = 0
+    for _, p in pairs(ghost:GetDescendants()) do
+        if (p.Name == "Primary") then
+            continue
+        end
+
+        if (p:IsA("MeshPart")) then
+            p.Transparency = 0.5
+        end
     end
+end
+
+-- Setup the UI hotbar selection frame for all the furniture.
+for _, furniture in pairs(furnitureModels:GetChildren()) do
+    local newFurniture = templateFurniture:Clone()
+    newFurniture.Name = furniture.Name
+    newFurniture.Parent = furnitureScrollingFrame
+
+    local viewportFrame = newFurniture:FindFirstChild("ViewportFrame")
+    local furnitureModel = furniture:Clone()
+    furnitureModel.Parent = viewportFrame
+    furnitureModel:SetPrimaryPartCFrame(CFrame.new(Vector3.new(0, 0, 0)))
+    local camera = Instance.new("Camera")
+    camera.Parent = viewportFrame
+    local boundingBox = furnitureModel:GetBoundingBox()
+    camera.CFrame = CFrame.new(boundingBox.Position + furnitureModel.PrimaryPart.CFrame.LookVector * -5, boundingBox.Position)
+    
+    viewportFrame.CurrentCamera = camera
+
+    newFurniture.MouseButton1Click:Connect(function()
+        switchGhostModel(furniture.Name)
+    end)
 end
 
 -- Find the upper most model of a part.
@@ -61,6 +99,10 @@ game:GetService("RunService").RenderStepped:Connect(function(dt)
 
     -- If player is currently placing furniture, run all this code each frame.
     if (furnitureMode == "placing") then
+        if (not ghost) then
+            return
+        end
+
          -- Ignore the ghost model when raycasting.
         mouse.TargetFilter = ghost
         if (not mouse.Target) then
