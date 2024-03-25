@@ -76,6 +76,9 @@ for _, furniture in pairs(furnitureModels:GetChildren()) do
     end)
 end
 
+local getSize = furnitureScrollingFrame.UIListLayout.AbsoluteContentSize
+furnitureScrollingFrame.CanvasSize = UDim2.new(0, getSize.X, 0, getSize.Y)
+
 -- Find the upper most model of a part.
 -- Helpful for raycasting, an example in this code is for when the player is trying to delete a piece of furniture.
 -- If you raycast, and it hits a part multiple models deep inside the furniture, it will grab the top most model.
