@@ -72,6 +72,9 @@ for _, furniture in pairs(furnitureModels:GetChildren()) do
     viewportFrame.CurrentCamera = camera
 
     newFurniture.MouseButton1Click:Connect(function()
+        if (furnitureMode ~= "placing") then
+            changeMode("placing")
+        end
         switchGhostModel(furniture.Name)
     end)
 end
@@ -218,6 +221,9 @@ userInputService.InputEnded:Connect(function(input: InputObject, processed)
     elseif (input.KeyCode == Enum.KeyCode.F) then
         -- Switch furniture mode on keyboard.
         changeMode("deleting")
+    elseif (input.KeyCode == Enum.KeyCode.G) then
+        -- Switch furniture mode on keyboard.
+        --changeMode("placing")
     end
 end)
 

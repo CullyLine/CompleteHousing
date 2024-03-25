@@ -1,3 +1,4 @@
+-- VERSION: 0.1.0
 local FurnitureService = {}
 
 -- Default data service for saving / loading data using profile service.
@@ -44,6 +45,12 @@ for _, player in pairs(game.Players:GetPlayers()) do
 	script.FurnitureLocal:Clone().Parent = player:WaitForChild("PlayerScripts")
 end
 script.FurnitureLocal.Parent = game.StarterPlayer.StarterPlayerScripts
+
+-- Do the same above but for the UI.
+for _, player in pairs(game.Players:GetPlayers()) do
+	script.CompleteHousingUI:Clone().Parent = player:WaitForChild("PlayerGui")
+end
+script.CompleteHousingUI.Parent = game:GetService("StarterGui")
 
 
 ---- STRUCTURE ----------------------------------------------------------------
