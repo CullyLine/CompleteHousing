@@ -34,6 +34,7 @@ local hotbar = screenUI:WaitForChild("Hotbar")
 local furnitureScrollingFrame = hotbar:WaitForChild("Furniture")
 local templateFurniture = furnitureScrollingFrame:WaitForChild("TemplateFurniture")
 templateFurniture.Parent = nil
+local options = screenUI:WaitForChild("Options")
 
 task.wait(2)
 
@@ -265,3 +266,13 @@ changeMode = function(newMode)
 
     furnitureMode = newMode
 end
+
+options:WaitForChild("Gridlock").MouseButton1Click:Connect(function()
+    if (not gridLock) then
+        gridLock = true
+        options.Gridlock.Image = "rbxassetid://16964591433"
+    else
+        gridLock = false
+        options.Gridlock.Image = "rbxassetid://16964589061"
+    end
+end)
