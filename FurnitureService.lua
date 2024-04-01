@@ -1,4 +1,4 @@
--- VERSION: 0.1.0
+-- VERSION: 0.2.0
 local FurnitureService = {}
 
 -- Default data service for saving / loading data using profile service.

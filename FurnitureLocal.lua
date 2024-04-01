@@ -13,7 +13,7 @@ local userRotation = Vector3.new(0, 0, 0)
 local rotationInterval = 15
 
 -- Lock furniture placement to the grid.
-local gridLock = false
+local gridLock = true
 
 -- Can furniture collide with other furniture while placing.
 local furnitureCollision = false
