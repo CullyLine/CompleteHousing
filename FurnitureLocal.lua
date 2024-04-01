@@ -12,6 +12,12 @@ local ghost = nil
 local userRotation = Vector3.new(0, 0, 0)
 local rotationInterval = 15
 
+-- Lock furniture placement to the grid.
+local gridLock = false
+
+-- Can furniture collide with other furniture while placing.
+local furnitureCollision = false
+
 -- Furniture "Mode" (placing, deleting, etc.)
 local furnitureMode = "placing"
 
@@ -30,6 +36,7 @@ local templateFurniture = furnitureScrollingFrame:WaitForChild("TemplateFurnitur
 templateFurniture.Parent = nil
 
 task.wait(2)
+
 
 -- STRUCTURE --------------------------------------------------------------------------------------------------------
 
@@ -116,7 +123,12 @@ game:GetService("RunService").RenderStepped:Connect(function(dt)
         end
         
         -- Lock the ghost model to the grid.
-        local gridPos = Vector3.new(math.round(mouse.Hit.X), mouse.Hit.Y, math.round(mouse.Hit.Z))
+        local gridPos = nil
+        if (gridLock) then
+            gridPos = Vector3.new(math.round(mouse.Hit.X), mouse.Hit.Y, math.round(mouse.Hit.Z))
+        else
+            gridPos = Vector3.new(mouse.Hit.X, mouse.Hit.Y, mouse.Hit.Z)
+        end
 
         -- Move the ghost furniture to the new position.
         ghost:SetPrimaryPartCFrame(CFrame.new(gridPos) * CFrame.Angles(0, math.rad(userRotation.Y), 0))
