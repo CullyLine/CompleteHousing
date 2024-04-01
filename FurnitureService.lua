@@ -30,6 +30,7 @@ for _, furnitureModel in pairs(furnitureModels:GetChildren()) do
 	primaryPart.Parent = newModel
 	newModel.PrimaryPart = primaryPart
 	local orientation, size = furnitureModel:GetBoundingBox()
+	primaryPart.Size = Vector3.new(size.X, primaryPart.Size.Y, size.Z)
 	primaryPart.CFrame = CFrame.new(orientation.Position.X, orientation.Position.Y - size.Y / 2, orientation.Position.Z)
     
     -- Set the selection box to be transparent.

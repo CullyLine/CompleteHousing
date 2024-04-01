@@ -16,7 +16,7 @@ local rotationInterval = 15
 local gridLock = true
 
 -- Can furniture collide with other furniture while placing.
-local furnitureCollision = false
+local furnitureCollision = true
 
 -- Furniture "Mode" (placing, deleting, etc.)
 local furnitureMode = "placing"
@@ -24,6 +24,10 @@ local furnitureMode = "placing"
 -- Furniture highlight object, used to highlight the currently selected piece of furniture, specifically for deleting and moving it.
 local currentlySelectedFurniture = nil
 local currentlySelectedFurnitureHighlight = script:WaitForChild("CurrentlySelectedFurnitureHighlight")
+
+-- Collision check part, follows the furniture around to check if it collides with other furniture / objects.
+local collisionCheckPart = script:WaitForChild("CollisionCheckPart")
+collisionCheckPart.Parent = nil
 
 -- Function variables, defined here and then assigned lower in the code so we may use the functions anywhere in the code.
 local changeMode = nil
@@ -110,6 +114,7 @@ game:GetService("RunService").RenderStepped:Connect(function(dt)
     -- Reset these variables each frame.
     currentlySelectedFurniture = nil
     currentlySelectedFurnitureHighlight.Adornee = nil
+    --collisionCheckPart.Parent = nil
 
     -- If player is currently placing furniture, run all this code each frame.
     if (furnitureMode == "placing") then
@@ -133,6 +138,24 @@ game:GetService("RunService").RenderStepped:Connect(function(dt)
 
         -- Move the ghost furniture to the new position.
         ghost:SetPrimaryPartCFrame(CFrame.new(gridPos) * CFrame.Angles(0, math.rad(userRotation.Y), 0))
+
+        if (furnitureCollision) then
+             -- Move the collision check part.
+            -- Set the size to the bounding box size of the ghost model.
+            local bbcframe, bbsize = ghost:GetBoundingBox()
+            collisionCheckPart.Size = bbsize
+            collisionCheckPart.CFrame = bbcframe
+            collisionCheckPart.Parent = workspace
+
+            -- Check for collisions using GetPartsInPart
+            local overlapParams = OverlapParams.new()
+            overlapParams.FilterDescendantsInstances = {ghost, workspace.Baseplate}
+            overlapParams.MaxParts = 1
+            local parts = workspace:GetPartsInPart(collisionCheckPart, overlapParams)
+            if (#parts > 0) then
+                --print("Colliding")
+            end
+        end
     elseif (furnitureMode == "deleting") then
         -- If the player is currently deleting furniture, run all this code each frame.
         -- Raycast to see if the player is looking at a piece of furniture.
