@@ -109,6 +109,28 @@ local function GetUpperMostModel(Part,TargetedParent)
     return Parent ~= TargetedParent and GetUpperMostModel(Parent,TargetedParent) or Part
 end
 
+-- Check if the ghost furniture is colliding with other furniture / objects.
+-- Return true if it is colliding, false if it is not.
+local function checkCollision()
+    -- Move the collision check part.
+    -- Set the size to the bounding box size of the ghost model.
+    local bbcframe, bbsize = ghost:GetBoundingBox()
+    collisionCheckPart.Size = bbsize
+    collisionCheckPart.CFrame = bbcframe
+    collisionCheckPart.Parent = workspace
+
+    -- Check for collisions using GetPartsInPart
+    local overlapParams = OverlapParams.new()
+    overlapParams.FilterDescendantsInstances = {ghost, workspace.Baseplate}
+    overlapParams.MaxParts = 1
+    local parts = workspace:GetPartsInPart(collisionCheckPart, overlapParams)
+    if (#parts > 0) then
+        return true
+    end
+
+    return false
+end
+
 -- Move the "ghost" or preview furniture to the position of the mouse each frame.
 game:GetService("RunService").RenderStepped:Connect(function(dt)
     -- Reset these variables each frame.
@@ -140,21 +162,7 @@ game:GetService("RunService").RenderStepped:Connect(function(dt)
         ghost:SetPrimaryPartCFrame(CFrame.new(gridPos) * CFrame.Angles(0, math.rad(userRotation.Y), 0))
 
         if (furnitureCollision) then
-             -- Move the collision check part.
-            -- Set the size to the bounding box size of the ghost model.
-            local bbcframe, bbsize = ghost:GetBoundingBox()
-            collisionCheckPart.Size = bbsize
-            collisionCheckPart.CFrame = bbcframe
-            collisionCheckPart.Parent = workspace
-
-            -- Check for collisions using GetPartsInPart
-            local overlapParams = OverlapParams.new()
-            overlapParams.FilterDescendantsInstances = {ghost, workspace.Baseplate}
-            overlapParams.MaxParts = 1
-            local parts = workspace:GetPartsInPart(collisionCheckPart, overlapParams)
-            if (#parts > 0) then
-                --print("Colliding")
-            end
+            local colliding = checkCollision()
         end
     elseif (furnitureMode == "deleting") then
         -- If the player is currently deleting furniture, run all this code each frame.
@@ -184,6 +192,13 @@ end)
 local function attemptPlaceFurniture()
     if (not ghost) then
         return
+    end
+
+    if (furnitureCollision) then
+        local colliding = checkCollision()
+        if (colliding) then
+            return
+        end
     end
 
     -- Put all the info of the ghost object into a dictionary named "furnitureArgs".
