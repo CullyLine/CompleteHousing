@@ -21,6 +21,10 @@ local furnitureCollision = true
 -- Furniture "Mode" (placing, deleting, etc.)
 local furnitureMode = "placing"
 
+-- Enable / Disable the furniture system.
+-- Turns on when the edit furniture UI is opened, and turns off when the UI is closed.
+local isEnabled = true
+
 -- Furniture highlight object, used to highlight the currently selected piece of furniture, specifically for deleting and moving it.
 local currentlySelectedFurniture = nil
 local currentlySelectedFurnitureHighlight = script:WaitForChild("CurrentlySelectedFurnitureHighlight")
@@ -39,6 +43,7 @@ local furnitureScrollingFrame = hotbar:WaitForChild("Furniture")
 local templateFurniture = furnitureScrollingFrame:WaitForChild("TemplateFurniture")
 templateFurniture.Parent = nil
 local options = screenUI:WaitForChild("Options")
+local editModeButtonFrame = screenUI:WaitForChild("EditModeButtonFrame")
 
 task.wait(2)
 
@@ -133,6 +138,10 @@ end
 
 -- Move the "ghost" or preview furniture to the position of the mouse each frame.
 game:GetService("RunService").RenderStepped:Connect(function(dt)
+    if (not isEnabled) then
+        return
+    end
+    
     -- Reset these variables each frame.
     currentlySelectedFurniture = nil
     currentlySelectedFurnitureHighlight.Adornee = nil
@@ -230,6 +239,10 @@ end
 
 -- Player left clicked with a PC mouse.
 mouse.Button1Up:Connect(function()
+    if (not isEnabled) then
+        return
+    end
+
     if (furnitureMode == "placing") then
         -- Place furniture on PC.
         attemptPlaceFurniture()
@@ -259,6 +272,10 @@ end
 
 -- Handle all the input (keybinds).
 userInputService.InputEnded:Connect(function(input: InputObject, processed)
+    if (not isEnabled) then
+        return
+    end
+
     if (processed) then
         return
     end
@@ -312,5 +329,19 @@ options:WaitForChild("Gridlock").MouseButton1Click:Connect(function()
     else
         gridLock = false
         options.Gridlock.Image = "rbxassetid://16964589061"
+    end
+end)
+
+editModeButtonFrame:WaitForChild("Edit").MouseButton1Click:Connect(function()
+    if (isEnabled == true) then
+        isEnabled = false
+        hotbar.Visible = false
+        options.Visible = false
+        editModeButtonFrame.Edit.Image = "rbxassetid://17060871381"
+    else
+        isEnabled = true
+        hotbar.Visible = true
+        options.Visible = true
+        editModeButtonFrame.Edit.Image = "rbxassetid://17060887729"
     end
 end)
