@@ -8,6 +8,9 @@ local furnitureDefaultDataService = require(script:WaitForChild("FurnitureDefaul
 local furnitureModels = script:WaitForChild("FurnitureModels")
 furnitureModels.Parent = game.ReplicatedStorage
 
+-- Region3 areas for each player, used for checking if a piece of furniture is being placed in a valid area.
+local buildRegions = {} -- [player.Name] = Region3
+
 local userAttemptPlaceFurnitureRemoteEvent = Instance.new("RemoteEvent", game.ReplicatedStorage)
 userAttemptPlaceFurnitureRemoteEvent.Name = "UserAttemptPlaceFurnitureRemoteEvent"
 local userAttemptDeleteFurnitureRemoteEvent = Instance.new("RemoteEvent", game.ReplicatedStorage)
@@ -157,5 +160,14 @@ userAttemptDeleteFurnitureRemoteEvent.OnServerEvent:Connect(function(player, fur
 
 	furnitureObject:Destroy()
 end)
+
+-- Change region of where a player is allowed to build.
+FurnitureService.changePlayerBuildRegion = function(player, region : Region3)
+	buildRegions[player.Name] = region
+end
+
+
+task.wait(2)
+FurnitureService.changePlayerBuildRegion(game.Players:GetChildren()[1], Region3.new(Vector3.new(0, 0, 0), Vector3.new(100, 100, 100)))
 
 return FurnitureService
