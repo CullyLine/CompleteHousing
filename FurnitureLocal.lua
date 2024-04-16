@@ -8,6 +8,7 @@ local mouse = game.Players.LocalPlayer:GetMouse()
 -- Furniture placing variables.
 local userAttemptPlaceFurnitureRemoteEvent = game.ReplicatedStorage:WaitForChild("UserAttemptPlaceFurnitureRemoteEvent")
 local userAttemptDeleteFurnitureRemoteEvent = game.ReplicatedStorage:WaitForChild("UserAttemptDeleteFurnitureRemoteEvent")
+local userAttemptLoadFurnitureRemoteEvent = game.ReplicatedStorage:WaitForChild("UserAttemptLoadFurnitureRemoteEvent")
 local ghost = nil
 local userRotation = Vector3.new(0, 0, 0)
 local rotationInterval = 15
@@ -16,7 +17,7 @@ local rotationInterval = 15
 local gridLock = true
 
 -- Can furniture collide with other furniture while placing.
-local furnitureCollision = true
+local furnitureCollision = false
 
 -- Furniture "Mode" (placing, deleting, etc.)
 local furnitureMode = "placing"
@@ -30,8 +31,8 @@ local currentlySelectedFurniture = nil
 local currentlySelectedFurnitureHighlight = script:WaitForChild("CurrentlySelectedFurnitureHighlight")
 
 -- Collision check part, follows the furniture around to check if it collides with other furniture / objects.
-local collisionCheckPart = script:WaitForChild("CollisionCheckPart")
-collisionCheckPart.Parent = nil
+-- local collisionCheckPart = script:WaitForChild("CollisionCheckPart")
+-- collisionCheckPart.Parent = nil
 
 -- Function variables, defined here and then assigned lower in the code so we may use the functions anywhere in the code.
 local changeMode = nil
@@ -44,8 +45,6 @@ local templateFurniture = furnitureScrollingFrame:WaitForChild("TemplateFurnitur
 templateFurniture.Parent = nil
 local options = screenUI:WaitForChild("Options")
 local editModeButtonFrame = screenUI:WaitForChild("EditModeButtonFrame")
-
-task.wait(2)
 
 
 -- STRUCTURE --------------------------------------------------------------------------------------------------------
@@ -310,27 +309,17 @@ end)
 -- Change to a new furniture edit mode ("placing", "deleting", "moving")
 changeMode = function(newMode)
     if (newMode == "placing") then
-
+        options:WaitForChild("Delete").Image = "rbxassetid://16865139057"
     elseif (newMode == "deleting") then
         if (ghost) then
             ghost:Destroy()
         end
 
-
+        options:WaitForChild("Delete").Image = "rbxassetid://16865150400"
     end
 
     furnitureMode = newMode
 end
-
-options:WaitForChild("Gridlock").MouseButton1Click:Connect(function()
-    if (not gridLock) then
-        gridLock = true
-        options.Gridlock.Image = "rbxassetid://16964591433"
-    else
-        gridLock = false
-        options.Gridlock.Image = "rbxassetid://16964589061"
-    end
-end)
 
 editModeButtonFrame:WaitForChild("Edit").MouseButton1Click:Connect(function()
     if (isEnabled == true) then
@@ -344,4 +333,22 @@ editModeButtonFrame:WaitForChild("Edit").MouseButton1Click:Connect(function()
         options.Visible = true
         editModeButtonFrame.Edit.Image = "rbxassetid://17060887729"
     end
+end)
+
+options:WaitForChild("Gridlock").MouseButton1Click:Connect(function()
+    if (not gridLock) then
+        gridLock = true
+        options.Gridlock.Image = "rbxassetid://16964591433"
+    else
+        gridLock = false
+        options.Gridlock.Image = "rbxassetid://16964589061"
+    end
+end)
+
+options:WaitForChild("Delete").MouseButton1Click:Connect(function()
+    changeMode("deleting")
+end)
+
+options:WaitForChild("Load").MouseButton1Click:Connect(function()
+    userAttemptLoadFurnitureRemoteEvent:FireServer()
 end)

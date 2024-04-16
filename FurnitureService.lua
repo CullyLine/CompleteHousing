@@ -12,6 +12,8 @@ local userAttemptPlaceFurnitureRemoteEvent = Instance.new("RemoteEvent", game.Re
 userAttemptPlaceFurnitureRemoteEvent.Name = "UserAttemptPlaceFurnitureRemoteEvent"
 local userAttemptDeleteFurnitureRemoteEvent = Instance.new("RemoteEvent", game.ReplicatedStorage)
 userAttemptDeleteFurnitureRemoteEvent.Name = "UserAttemptDeleteFurnitureRemoteEvent"
+local userAttemptLoadFurnitureRemoteEvent = Instance.new("RemoteEvent", game.ReplicatedStorage)
+userAttemptLoadFurnitureRemoteEvent.Name = "UserAttemptLoadFurnitureRemoteEvent"
 
 -- Create a folder in the workspace to store all the placed furniture.
 local furnitureFolder = Instance.new("Folder", workspace)
@@ -99,7 +101,7 @@ userAttemptPlaceFurnitureRemoteEvent.OnServerEvent:Connect(function(player, furn
 end)
 
 -- Load player's saved furniture.
-game.ReplicatedStorage.DevRemoteEvent.OnServerEvent:Connect(function(player)
+local function attemptLoad(player)
 	-- Gather the player's saved furniture data.
 	local profile = furnitureDefaultDataService.GetProfile(player)
 	local furnitureData = profile["Furniture"]
@@ -127,7 +129,10 @@ game.ReplicatedStorage.DevRemoteEvent.OnServerEvent:Connect(function(player)
 
 		local furnitureObject = furnitureObjectModule.new(furniture.FurnitureModelName, extraArgs)
 	end
+end
 
+userAttemptLoadFurnitureRemoteEvent.OnServerEvent:Connect(function(player)
+	attemptLoad(player)
 end)
 
 -- User is trying to delete the selected piece of furniture.
