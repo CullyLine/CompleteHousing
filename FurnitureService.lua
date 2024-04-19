@@ -72,7 +72,13 @@ userAttemptPlaceFurnitureRemoteEvent.OnServerEvent:Connect(function(player, furn
 
 	local origin = workspace.Origin.Position
 
-	local cframe = CFrame.new(Vector3.new(origin.X + positionOffsetX, origin.Y + positionOffsetY, origin.Z + positionOffsetZ))
+	local cframe = CFrame.new(Vector3.new(origin.X + positionOffsetX, origin.Y + positionOffsetY, origin.Z + positionOffsetZ)) 
+
+	local canBuild = FurnitureService.canPlayerBuild(player, cframe.Position)
+	if (not canBuild) then
+		print("Player can't place furniture here!")
+		return
+	end
 
 	-- Apply rotation
 	cframe = cframe * CFrame.Angles(0, math.rad(rotationOffsetY), 0)
@@ -101,8 +107,6 @@ userAttemptPlaceFurnitureRemoteEvent.OnServerEvent:Connect(function(player, furn
 		PositionOffsetZ = furnitureObject.ModelInstance.PrimaryPart.Position.Z - workspace.Origin.Position.Z,
 		RotationOffsetY = anglesY,
 	}
-
-	print(FurnitureService.canPlayerBuild(player, furnitureObject.ModelInstance.PrimaryPart.Position))
 end)
 
 -- Load player's saved furniture.
