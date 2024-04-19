@@ -101,6 +101,8 @@ userAttemptPlaceFurnitureRemoteEvent.OnServerEvent:Connect(function(player, furn
 		PositionOffsetZ = furnitureObject.ModelInstance.PrimaryPart.Position.Z - workspace.Origin.Position.Z,
 		RotationOffsetY = anglesY,
 	}
+
+	print(FurnitureService.canPlayerBuild(player, furnitureObject.ModelInstance.PrimaryPart.Position))
 end)
 
 -- Load player's saved furniture.
@@ -166,8 +168,30 @@ FurnitureService.changePlayerBuildRegion = function(player, region : Region3)
 	buildRegions[player.Name] = region
 end
 
+-- Check if a player is allowed to build at a certain position.
+FurnitureService.canPlayerBuild = function(player, position : Vector3)
+	local region : Region3 = buildRegions[player.Name]
+	if (region == nil) then
+		return false
+	end
+
+	local inBounds = false
+	local size = region.Size
+	local origin = region.CFrame.Position
+	local halfSize = size / 2
+
+	if (position.X >= origin.X - halfSize.X and position.X <= origin.X + halfSize.X) then
+		if (position.Y >= origin.Y - halfSize.Y and position.Y <= origin.Y + halfSize.Y) then
+			if (position.Z >= origin.Z - halfSize.Z and position.Z <= origin.Z + halfSize.Z) then
+				inBounds = true
+			end
+		end
+	end
+
+	return inBounds
+end
 
 task.wait(2)
-FurnitureService.changePlayerBuildRegion(game.Players:GetChildren()[1], Region3.new(Vector3.new(0, 0, 0), Vector3.new(100, 100, 100)))
+FurnitureService.changePlayerBuildRegion(game.Players:GetChildren()[1], Region3.new(workspace.Origin.Position - Vector3.new(50, 50, 50), workspace.Origin.Position + Vector3.new(50, 50, 50)))
 
 return FurnitureService
