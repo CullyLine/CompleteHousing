@@ -47,8 +47,29 @@ local profileStore = profileService.GetProfileStore(
 local profiles = {} --[player] = profile 
 
 ---- STRUCTURE ----
+-- Used to create int value objects, string value objects, etc. inside the player object.
+-- This is used for visual stuff, you can update the value on the server and it will replicate to the client.
+local function createPlayerDataValueObjects(player, profile)
+	local playerData = Instance.new("Folder")
+	playerData.Name = "Data"
+	playerData.Parent = player
+
+	local buildRegionOriginValueObject = Instance.new("Vector3Value")
+	buildRegionOriginValueObject.Name = "BuildRegionOrigin"
+	buildRegionOriginValueObject.Parent = playerData
+
+	local buildRegionSizeValueObject = Instance.new("Vector3Value")
+	buildRegionSizeValueObject.Name = "BuildRegionSize"
+	buildRegionSizeValueObject.Parent = playerData
+
+	
+end
+
 local function playerAdded(player)
 	local profile = FurnitureDefaultDataService.LoadProfile(player)
+	if (profile) then
+		createPlayerDataValueObjects(player, profile)
+	end
 end
 
 task.spawn(function()
