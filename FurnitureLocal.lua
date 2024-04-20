@@ -349,8 +349,14 @@ editModeButtonFrame:WaitForChild("Edit").MouseButton1Click:Connect(function()
 end)
 
 local function buildRegionChanged()
-    buildRegionVisual.Size = buildRegionSizeValueObject.Value
-    buildRegionVisual.Position = buildRegionOriginValueObject.Value
+    if (showBuildRegion) then 
+        buildRegionVisual.Size = buildRegionSizeValueObject.Value
+        buildRegionVisual.Position = buildRegionOriginValueObject.Value
+        buildRegionVisual.BuildRegionVisualSelectionBox.Transparency = .8
+    else
+        buildRegionVisual.BuildRegionVisualSelectionBox.Transparency = 1
+    end
+    
 end
 buildRegionChanged()
 buildRegionOriginValueObject:GetPropertyChangedSignal("Value"):Connect(buildRegionChanged)
