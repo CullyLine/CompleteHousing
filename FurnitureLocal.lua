@@ -201,6 +201,12 @@ game:GetService("RunService").RenderStepped:Connect(function(dt)
                     return
                 end
 
+                -- See if the player owns this furniture.
+                local parentFolder = upperMostModel.Parent
+                if (parentFolder.Name ~= game.Players.LocalPlayer.Name) then
+                    return
+                end
+
                 currentlySelectedFurniture = upperMostModel
                 currentlySelectedFurnitureHighlight.Adornee = upperMostModel
             end
