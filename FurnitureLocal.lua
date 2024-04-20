@@ -37,6 +37,19 @@ local currentlySelectedFurnitureHighlight = script:WaitForChild("CurrentlySelect
 -- Function variables, defined here and then assigned lower in the code so we may use the functions anywhere in the code.
 local changeMode = nil
 
+-- Player data value objects, used to get data for player data, set from the server.
+-- When these values are set on the server, they will replicate to the clients without
+-- us having to use remote events / functions.
+local playerDataFolder = game.Players.LocalPlayer:WaitForChild("Data")
+local buildRegionOriginValueObject = playerDataFolder:WaitForChild("BuildRegionOrigin")
+local buildRegionSizeValueObject = playerDataFolder:WaitForChild("BuildRegionSize")
+
+-- Show a selection box around the player's build region.
+local showBuildRegion = true
+local buildRegionVisual = script:WaitForChild("BuildRegionVisual"):Clone()
+buildRegionVisual.Parent = workspace.Terrain
+buildRegionVisual.BuildRegionVisualSelectionBox.Adornee = buildRegionVisual
+
 -- UI variables
 local screenUI = game.Players.LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("CompleteHousingUI")
 local hotbar = screenUI:WaitForChild("Hotbar")
@@ -119,18 +132,18 @@ local function checkCollision()
     -- Move the collision check part.
     -- Set the size to the bounding box size of the ghost model.
     local bbcframe, bbsize = ghost:GetBoundingBox()
-    collisionCheckPart.Size = bbsize
-    collisionCheckPart.CFrame = bbcframe
-    collisionCheckPart.Parent = workspace
+    --collisionCheckPart.Size = bbsize
+    --collisionCheckPart.CFrame = bbcframe
+    --collisionCheckPart.Parent = workspace
 
     -- Check for collisions using GetPartsInPart
     local overlapParams = OverlapParams.new()
     overlapParams.FilterDescendantsInstances = {ghost, workspace.Baseplate}
     overlapParams.MaxParts = 1
-    local parts = workspace:GetPartsInPart(collisionCheckPart, overlapParams)
-    if (#parts > 0) then
-        return true
-    end
+    -- local parts = workspace:GetPartsInPart(collisionCheckPart, overlapParams)
+    -- if (#parts > 0) then
+    --     return true
+    -- end
 
     return false
 end
@@ -334,6 +347,14 @@ editModeButtonFrame:WaitForChild("Edit").MouseButton1Click:Connect(function()
         editModeButtonFrame.Edit.Image = "rbxassetid://17060887729"
     end
 end)
+
+local function buildRegionChanged()
+    buildRegionVisual.Size = buildRegionSizeValueObject.Value
+    buildRegionVisual.Position = buildRegionOriginValueObject.Value
+end
+buildRegionChanged()
+buildRegionOriginValueObject:GetPropertyChangedSignal("Value"):Connect(buildRegionChanged)
+buildRegionSizeValueObject:GetPropertyChangedSignal("Value"):Connect(buildRegionChanged)
 
 options:WaitForChild("Gridlock").MouseButton1Click:Connect(function()
     if (not gridLock) then

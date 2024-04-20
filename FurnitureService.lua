@@ -170,6 +170,14 @@ end)
 -- Change region of where a player is allowed to build.
 FurnitureService.changePlayerBuildRegion = function(player, region : Region3)
 	buildRegions[player.Name] = region
+
+	-- Update this players value objects to reflect the new build region.
+	-- This is for visuals on the client side.
+	local playerData = player:WaitForChild("Data")
+	local buildRegionOriginValueObject = playerData:WaitForChild("BuildRegionOrigin")
+	local buildRegionSizeValueObject = playerData:WaitForChild("BuildRegionSize")
+	buildRegionOriginValueObject.Value = region.CFrame.Position
+	buildRegionSizeValueObject.Value = region.Size
 end
 
 -- Check if a player is allowed to build at a certain position.
