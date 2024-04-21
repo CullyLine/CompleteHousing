@@ -40,7 +40,7 @@ local profileService = require(script:WaitForChild("ProfileService"))
 local templateData = {["Furniture"] = {}}
 
 local profileStore = profileService.GetProfileStore(
-	"PayerFurniture" .. "1",
+	"PayerFurniture" .. "2",
 	templateData
 )
 
@@ -62,7 +62,9 @@ local function createPlayerDataValueObjects(player, profile)
 	buildRegionSizeValueObject.Name = "BuildRegionSize"
 	buildRegionSizeValueObject.Parent = playerData
 
-	
+	local playerOriginValueObject = Instance.new("Vector3Value")
+	playerOriginValueObject.Name = "PlayerOrigin"
+	playerOriginValueObject.Parent = playerData
 end
 
 local function playerAdded(player)

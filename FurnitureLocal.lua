@@ -236,7 +236,7 @@ local function attemptPlaceFurniture()
     -- If the player is allowed to place the furniture, we can then place the furniture in the desired location, but on the server,
     -- so it replicates / is shown to all players in the game.
     local furnitureArgs = {}
-    local origin = workspace.Origin.Position
+    local origin = playerDataFolder.PlayerOrigin.Value
     furnitureArgs["PositionOffsetX"] = ghost.PrimaryPart.Position.X - origin.X
     furnitureArgs["PositionOffsetY"] = ghost.PrimaryPart.Position.Y - origin.Y
     furnitureArgs["PositionOffsetZ"] = ghost.PrimaryPart.Position.Z - origin.Z

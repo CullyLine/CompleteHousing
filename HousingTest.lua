@@ -61,6 +61,10 @@ for _, house in pairs(houses:GetChildren()) do
         local newBuildRegion = Region3.new(point1, point2)
         furnitureService.changePlayerBuildRegion(player, newBuildRegion)
 
+        -- Change the player's origin of their house, plot, etc.
+        -- Used for placing furniture in the right location, and saving accurately.
+        furnitureService.changePlayerOrigin(player, centerPosition)
+
         -- Make claim part invisible.
         house.Claim.Transparency = 1
         house.Claim.SurfaceGui.Enabled = false

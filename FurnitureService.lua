@@ -70,10 +70,12 @@ userAttemptPlaceFurnitureRemoteEvent.OnServerEvent:Connect(function(player, furn
 	local positionOffsetZ = furnitureArgs["PositionOffsetZ"]
 	local rotationOffsetY = furnitureArgs["RotationOffsetY"]
 
-	local origin = workspace.Origin.Position
+	-- Grab the origin of the player's build area.
+	-- In this function, it's used to save the offset correctly.
+	local playerOrigin = player.Data.PlayerOrigin.Value
 
-	local cframe = CFrame.new(Vector3.new(origin.X + positionOffsetX, origin.Y + positionOffsetY, origin.Z + positionOffsetZ)) 
-
+	local cframe = CFrame.new(Vector3.new(playerOrigin.X + positionOffsetX, playerOrigin.Y + positionOffsetY, playerOrigin.Z + positionOffsetZ)) 
+	print(cframe.Position)
 	local canBuild = FurnitureService.canPlayerBuild(player, cframe.Position)
 	if (not canBuild) then
 		print("Player can't place furniture here!")
@@ -102,9 +104,9 @@ userAttemptPlaceFurnitureRemoteEvent.OnServerEvent:Connect(function(player, furn
 	anglesZ = math.deg(anglesZ)
 	profile["Furniture"][furnitureObject.GUID] = {
 		FurnitureModelName = furnitureObject.FurnitureModelName,
-		PositionOffsetX = furnitureObject.ModelInstance.PrimaryPart.Position.X - workspace.Origin.Position.X,
-		PositionOffsetY = furnitureObject.ModelInstance.PrimaryPart.Position.Y - workspace.Origin.Position.Y,
-		PositionOffsetZ = furnitureObject.ModelInstance.PrimaryPart.Position.Z - workspace.Origin.Position.Z,
+		PositionOffsetX = furnitureObject.ModelInstance.PrimaryPart.Position.X - playerOrigin.X,
+		PositionOffsetY = furnitureObject.ModelInstance.PrimaryPart.Position.Y - playerOrigin.Y,
+		PositionOffsetZ = furnitureObject.ModelInstance.PrimaryPart.Position.Z - playerOrigin.Z,
 		RotationOffsetY = anglesY,
 	}
 end)
@@ -115,14 +117,18 @@ local function attemptLoad(player)
 	local profile = furnitureDefaultDataService.GetProfile(player)
 	local furnitureData = profile["Furniture"]
 
+	-- Grab the origin of the player's build area.
+	-- This is used to place the furniture in the correct position in the workspace.
+	local playerOrigin = player.Data.PlayerOrigin.Value
+
 	-- For each piece of furniture in the player's data, create a new object for it.
 	-- This will place the furniture in the correct position in the workspace.
 	for guid, furniture in pairs(furnitureData) do
 		local cframe = CFrame.new(
 			Vector3.new(
-				workspace.Origin.Position.X + furniture.PositionOffsetX,
-				workspace.Origin.Position.Y + furniture.PositionOffsetY,
-				workspace.Origin.Position.Z + furniture.PositionOffsetZ
+				playerOrigin.X + furniture.PositionOffsetX,
+				playerOrigin.Y + furniture.PositionOffsetY,
+				playerOrigin.Z + furniture.PositionOffsetZ
 			)
 		)
 
@@ -201,6 +207,16 @@ FurnitureService.canPlayerBuild = function(player, position : Vector3)
 	end
 
 	return inBounds
+end
+
+-- Change the origin of the player's build area.
+-- This is used to know where to place the furniture / save it accurately.
+-- An Example would be the center of a house.
+FurnitureService.changePlayerOrigin = function(player, origin : Vector3)
+	--origins[player.Name] = origin
+
+	local playerOriginValueObject = player:WaitForChild("Data"):WaitForChild("PlayerOrigin")
+	playerOriginValueObject.Value = origin
 end
 
 task.wait(2)
