@@ -77,8 +77,10 @@ local function switchGhostModel(furnitureName)
             continue
         end
 
-        if (p:IsA("MeshPart")) then
+        if (p:IsA("BasePart")) then
             p.Transparency = 0.5
+            p.Anchored = true
+            p.CanCollide = false
         end
     end
 end
@@ -165,7 +167,7 @@ game:GetService("RunService").RenderStepped:Connect(function(dt)
             return
         end
 
-         -- Ignore the ghost model when raycasting.
+        -- Ignore the ghost model when raycasting.
         mouse.TargetFilter = ghost
         if (not mouse.Target) then
             return
@@ -346,6 +348,12 @@ editModeButtonFrame:WaitForChild("Edit").MouseButton1Click:Connect(function()
         hotbar.Visible = false
         options.Visible = false
         editModeButtonFrame.Edit.Image = "rbxassetid://17060871381"
+        if (ghost) then
+            ghost:Destroy()
+            ghost = nil
+        end
+        currentlySelectedFurniture = nil
+        currentlySelectedFurnitureHighlight.Adornee = nil
     else
         isEnabled = true
         hotbar.Visible = true

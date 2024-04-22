@@ -68,5 +68,8 @@ for _, house in pairs(houses:GetChildren()) do
         -- Make claim part invisible.
         house.Claim.Transparency = 1
         house.Claim.SurfaceGui.Enabled = false
+
+        -- Place the players saved furniture in their newly claimed house.
+        furnitureService.loadFurniture(player)
     end)
 end

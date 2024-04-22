@@ -112,7 +112,13 @@ userAttemptPlaceFurnitureRemoteEvent.OnServerEvent:Connect(function(player, furn
 end)
 
 -- Load player's saved furniture.
-local function attemptLoad(player)
+FurnitureService.loadFurniture = function(player)
+	-- Remove current furniture.
+	local userFurnitureFolder = furnitureFolder:FindFirstChild(player.Name)
+	if (userFurnitureFolder) then
+		userFurnitureFolder:Destroy()
+	end
+
 	-- Gather the player's saved furniture data.
 	local profile = furnitureDefaultDataService.GetProfile(player)
 	local furnitureData = profile["Furniture"]
@@ -147,7 +153,7 @@ local function attemptLoad(player)
 end
 
 userAttemptLoadFurnitureRemoteEvent.OnServerEvent:Connect(function(player)
-	attemptLoad(player)
+	FurnitureService.loadFurniture(player)
 end)
 
 -- User is trying to delete the selected piece of furniture.
@@ -221,8 +227,5 @@ FurnitureService.changePlayerOrigin = function(player, origin : Vector3)
 	local playerOriginValueObject = player:WaitForChild("Data"):WaitForChild("PlayerOrigin")
 	playerOriginValueObject.Value = origin
 end
-
-task.wait(2)
-FurnitureService.changePlayerBuildRegion(game.Players:GetChildren()[1], Region3.new(workspace.Origin.Position - Vector3.new(50, 50, 50), workspace.Origin.Position + Vector3.new(50, 50, 50)))
 
 return FurnitureService
