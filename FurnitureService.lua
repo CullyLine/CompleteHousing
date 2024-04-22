@@ -75,7 +75,6 @@ userAttemptPlaceFurnitureRemoteEvent.OnServerEvent:Connect(function(player, furn
 	local playerOrigin = player.Data.PlayerOrigin.Value
 
 	local cframe = CFrame.new(Vector3.new(playerOrigin.X + positionOffsetX, playerOrigin.Y + positionOffsetY, playerOrigin.Z + positionOffsetZ)) 
-	print(cframe.Position)
 	local canBuild = FurnitureService.canPlayerBuild(player, cframe.Position)
 	if (not canBuild) then
 		print("Player can't place furniture here!")
@@ -100,7 +99,8 @@ userAttemptPlaceFurnitureRemoteEvent.OnServerEvent:Connect(function(player, furn
 	-- Convert the angles to degrees before saving it. (0 - 360 degrees) It's easier for me to understand.
 	local anglesX, anglesY, anglesZ = furnitureObject.ModelInstance.PrimaryPart.CFrame:ToEulerAnglesXYZ()
 	anglesX = math.deg(anglesX)
-	anglesY = math.deg(anglesY)
+	--anglesY = math.deg(anglesY)
+	anglesY = rotationOffsetY
 	anglesZ = math.deg(anglesZ)
 	profile["Furniture"][furnitureObject.GUID] = {
 		FurnitureModelName = furnitureObject.FurnitureModelName,
@@ -169,6 +169,9 @@ userAttemptDeleteFurnitureRemoteEvent.OnServerEvent:Connect(function(player, fur
 		warn("Furniture with GUID " .. furnitureGUID .. " not found in player " .. player.Name .. "'s furniture folder.")
 		return
 	end
+
+	local profile = furnitureDefaultDataService.GetProfile(player)
+	profile["Furniture"][furnitureGUID] = nil
 
 	furnitureObject:Destroy()
 end)
